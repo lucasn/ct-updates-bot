@@ -1,6 +1,6 @@
 from telegram import Update
 from telegram.ext import ApplicationBuilder, ContextTypes, \
-    CommandHandler, MessageHandler, filters, CallbackContext
+    CommandHandler, CallbackContext
 from database import Database
 from scrapping import retrieve_news
 import config
@@ -27,7 +27,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     await context.bot.send_message(
         chat_id=chat_id,
-        text='Usuário registrado. Você receberá atualizações agora.'
+        text='Usuário registrado com sucesso. Você receberá atualizações a partir de agora.'
     )
 
 
