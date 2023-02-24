@@ -14,7 +14,7 @@ def main() -> None:
 
     start_hander = CommandHandler('start', start)
 
-    application.job_queue.run_repeating(check_updates, 10)
+    application.job_queue.run_repeating(check_updates, interval=30)
     application.add_handler(start_hander)
 
     application.run_polling()
@@ -36,10 +36,16 @@ async def check_updates(context: CallbackContext) -> None:
     news = await retrieve_news()
     for entry in news:
         if not database.check_news_entry(entry['url']):
-            await context.bot.send_message(
-                chat_id=819581615,
-                text=entry['title']
-            )
+            message = f"<b>{entry['title']}</b>\nData de publicação: {entry['publish_date']}\nLink: {entry['url']}"
+
+            chats = database.retrieve_all_chats()
+            for chat in chats:
+                await context.bot.send_message(
+                    chat_id=chat[0],
+                    text=message,
+                    parse_mode='HTML'
+                )
+            database.insert_news_entry(entry['title'], entry['url'])
 
 if __name__ == '__main__':
     main()

@@ -11,7 +11,7 @@ class Database:
 
     def register_chat_if_is_not_registered(self, chat_id: int) -> None:
         cursor = self.connection.cursor()
-        res = cursor.execute(f'SELECT * FROM chat WHERE chat_id={chat_id}')
+        res = cursor.execute(f'SELECT * FROM chat WHERE chat_id={chat_id};')
 
         if len(res.fetchall()) == 0: 
             logging.info(f'Chat {chat_id} has been registered')
@@ -20,16 +20,22 @@ class Database:
 
         cursor.close() 
 
+    def retrieve_all_chats(self) -> 'list[tuple[int]]':
+        cursor = self.connection.cursor()
+        chats = cursor.execute('SELECT * FROM chat;').fetchall()
+        cursor.close()
+        return chats
+
     def check_news_entry(self, url: str) -> bool:
         cursor = self.connection.cursor()
-        entries = cursor.execute(f"SELECT * FROM news WHERE url='{url}'").fetchall()
+        entries = cursor.execute(f"SELECT * FROM news WHERE url='{url}';").fetchall()
         cursor.close()
 
         return len(entries) != 0 # return True if entry already exists
     
     def insert_news_entry(self, title: str, url: str) -> None:
-        logging.info(f'Inserting entry with title "{title}"')
+        logging.info(f'Inserting entry with title "{title}";')
         cursor = self.connection.cursor()
-        cursor.execute(f"INSERT INTO news VALUES ('{title}', '{url}')")
+        cursor.execute(f"INSERT INTO news VALUES ('{title}', '{url}');")
         cursor.close()
         self.connection.commit()
