@@ -13,9 +13,11 @@ def main() -> None:
     application.bot_data['database'] = database
 
     start_hander = CommandHandler('start', start)
+    remove_handler = CommandHandler('remove', remove)
 
-    application.job_queue.run_repeating(check_updates, interval=30)
+    application.job_queue.run_repeating(check_updates, interval=60)
     application.add_handler(start_hander)
+    application.add_handler(remove_handler)
 
     application.run_polling()
 
@@ -27,7 +29,20 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     await context.bot.send_message(
         chat_id=chat_id,
-        text='Usuário registrado com sucesso. Você receberá atualizações a partir de agora.'
+        text='Usuário registrado com sucesso. Você receberá atualizações a partir de agora.\n\nEnvie <b>\\remove</b> para se descadastrar',
+        parse_mode='HTML'
+    )
+
+
+async def remove(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    chat_id = update.effective_chat.id
+    database = context.bot_data['database']
+    database.remove_chat(chat_id)
+
+    await context.bot.send_message(
+        chat_id=chat_id,
+        text='Usuário removido com sucesso. Caso deseje receber atualizações novamente, envie <b>\start</b>.',
+        parse_mode='HTML'
     )
 
 
@@ -36,7 +51,7 @@ async def check_updates(context: CallbackContext) -> None:
     news = await retrieve_news()
     for entry in news:
         if not database.check_news_entry(entry['url']):
-            message = f"<b>{entry['title']}</b>\nData de publicação: {entry['publish_date']}\nLink: {entry['url']}"
+            message = f"<b>{entry['title']}</b>\n\nData de publicação: {entry['publish_date']}\n\nLink: {entry['url']}"
 
             chats = database.retrieve_all_chats()
             for chat in chats:

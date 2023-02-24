@@ -20,6 +20,13 @@ class Database:
 
         cursor.close() 
 
+    def remove_chat(self, chat_id: int) -> None:
+        cursor = self.connection.cursor()
+        logging.info(f'Chat {chat_id} has been removed')
+        cursor.execute(f'DELETE FROM chat WHERE chat_id={chat_id};')
+        self.connection.commit()
+        cursor.close()
+
     def retrieve_all_chats(self) -> 'list[tuple[int]]':
         cursor = self.connection.cursor()
         chats = cursor.execute('SELECT * FROM chat;').fetchall()
